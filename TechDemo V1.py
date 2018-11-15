@@ -31,7 +31,11 @@ class TechDemo():
         targetSurface.unlock()
     
     def drawCircles(self):
-        pass
+        cx = 200
+        cy = 500
+        r = 30
+        color = (255, 0, 0)
+        pygame.draw.circle(self.frameSurface, color, (cx, cy), r)
     
     def run(self):
         while not self.done:
