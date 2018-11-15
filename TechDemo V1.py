@@ -67,6 +67,8 @@ class TechDemo():
                             self.leftHandX = joints[PyKinectV2.JointType_HandLeft].Position.x
                             self.leftHandY = joints[PyKinectV2.JointType_HandLeft].Position.y
             
+            self.drawCircles()
+            
             hToW = float(self.frameSurface.get_height()) / self.frameSurface.get_width()
             targetHeight = int(hToW * self.screen.get_width())
             surfaceToDraw = pygame.transform.scale(self.frameSurface, (self.screen.get_width(), targetHeight));
