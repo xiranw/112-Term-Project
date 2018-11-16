@@ -34,7 +34,10 @@ class TechDemo():
         cx = 200
         cy = 500
         r = 30
-        color = (255, 0, 0)
+        if self.leftHandX == cx and self.leftHandX == cy:
+            color = (0, 255, 0)
+        else:
+            color = (255, 0, 0)
         pygame.draw.circle(self.frameSurface, color, (cx, cy), r)
     
     def run(self):
@@ -58,14 +61,16 @@ class TechDemo():
                         if not body.is_tracked: 
                             continue         
                         
-                        joints = body.joints 
+                        joints = body.joints
+                        #important! Converts joint coordinates to canvas coordinates
+                        jointPoints = self._kinect.body_joints_to_color_space(joints)
                         # save the hand positions
                         if joints[PyKinectV2.JointType_HandRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                            self.rightHandX = joints[PyKinectV2.JointType_HandRight].Position.x
-                            self.rightHandY = joints[PyKinectV2.JointType_HandRight].Position.y
+                            self.rightHandX = jointPoints[PyKinectV2.JointType_HandRight].x
+                            self.rightHandY = jointPoints[PyKinectV2.JointType_HandRight].y
                         if joints[PyKinectV2.JointType_HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                            self.leftHandX = joints[PyKinectV2.JointType_HandLeft].Position.x
-                            self.leftHandY = joints[PyKinectV2.JointType_HandLeft].Position.y
+                            self.leftHandX = jointPoints[PyKinectV2.JointType_HandLeft].x
+                            self.leftHandY = jointPoints[PyKinectV2.JointType_HandLeft].y
             
             self.drawCircles()
             
