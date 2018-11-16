@@ -1,3 +1,4 @@
+#https://github.com/Kinect/PyKinect2/blob/master/examples/PyKinectBodyGame.py
 from pykinect2 import PyKinectV2, PyKinectRuntime
 from pykinect2.PyKinectV2 import *
 
@@ -33,12 +34,14 @@ class TechDemo():
         cx = 700
         cy = 500
         r = 30
-        if  cx-30 < self.leftHandX < cx+30 and cy-30 < self.leftHandY < cy+30:
+        if  cx-30 < self.leftHandX < cx+30 and cy-30 < self.leftHandY < cy+30 or \
+            cx-30 < self.rightHandX < cx+ 30 and cy-30 < self.rightHandY < cy+30:
             color = (0, 255, 0)
         else:
             color = (255, 0, 0)
         pygame.draw.circle(self.frameSurface, color, (cx, cy), r)
         pygame.draw.circle(self.frameSurface, color, (int(self.leftHandX), int(self.leftHandY)), r)
+        pygame.draw.circle(self.frameSurface, color, (int(self.rightHandX), int(self.rightHandY)), r)
     
     def run(self):
         while not self.done:
