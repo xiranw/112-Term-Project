@@ -1,9 +1,9 @@
+#https://github.com/Kinect/PyKinect2/blob/master/examples/PyKinectBodyGame.py
 from pykinect2 import PyKinectV2, PyKinectRuntime
 from pykinect2.PyKinectV2 import *
 
-import module_manager
-module_manager.review()
 import pygame
+import ctypes
 
 class TechDemo():
     def __init__(self):
@@ -31,20 +31,29 @@ class TechDemo():
         targetSurface.unlock()
     
     def drawCircles(self):
-        cx = 200
-        cy = 500
+        green = (0, 255, 0)
+        red = 
+        cx1, cy1 = 700, 500
+        cy2, cy2 = 900, 500
         r = 30
-        if self.leftHandX == cx and self.leftHandX == cy:
-            color = (0, 255, 0)
+        if  cx1-30 < self.leftHandX < cx1+30 and cy1-30 < self.leftHandY < cy1+30:
+            color1 = green
+            colorLeftHand = green
+        elif cx1-30 < self.rightHandX < cx1+30 and cy1-30 < self.rightHandY < cy1+30:
+            color1 = green
+            colorRightHand = green
         else:
-            color = (255, 0, 0)
-        pygame.draw.circle(self.frameSurface, color, (cx, cy), r)
+            color1 = color2 = colorLeftHand = colorRightHand = red
+        pygame.draw.circle(self.frameSurface, color1, (cx1, cy1), r)
+        pygame.draw.circle(self.frameSurface, color2, (cx2, cy2), r)
+        pygame.draw.circle(self.frameSurface, colorLeftHand, (int(self.leftHandX), int(self.leftHandY)), r)
+        pygame.draw.circle(self.frameSurface, colorRightHand, (int(self.rightHandX), int(self.rightHandY)), r)
     
     def run(self):
         while not self.done:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.done = False
+                    self.done = True
             
             if self.kinect.has_new_color_frame():
                 frame = self.kinect.get_last_color_frame()
@@ -63,7 +72,7 @@ class TechDemo():
                         
                         joints = body.joints
                         #important! Converts joint coordinates to canvas coordinates
-                        jointPoints = self._kinect.body_joints_to_color_space(joints)
+                        jointPoints = self.kinect.body_joints_to_color_space(joints)
                         # save the hand positions
                         if joints[PyKinectV2.JointType_HandRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
                             self.rightHandX = jointPoints[PyKinectV2.JointType_HandRight].x
@@ -88,5 +97,5 @@ class TechDemo():
         self.kinect.close()
         pygame.quit()
 
-game = TechDemo();
-game.run();
+game = TechDemo()
+game.run()
