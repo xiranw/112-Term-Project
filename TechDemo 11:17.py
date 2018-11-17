@@ -17,7 +17,7 @@ class TechDemo():
         self.bodies = None
         
         self.rightHandPos = (-50, -50)
-        self.leftHandX, self.leftHandY = 0, 0
+        self.leftHandPos = (-50, -50)
         
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((1000, 1000))
@@ -31,19 +31,6 @@ class TechDemo():
         ctypes.memmove(address, frame.ctypes.data, frame.size)
         del address
         targetSurface.unlock()
-    
-    '''def drawCircles(self):
-        cx = 700
-        cy = 500
-        r = 30
-        if  cx-30 < self.leftHandX < cx+30 and cy-30 < self.leftHandY < cy+30 or \
-            cx-30 < self.rightHandX < cx+ 30 and cy-30 < self.rightHandY < cy+30:
-            color = (0, 255, 0)
-        else:
-            color = (255, 0, 0)
-        pygame.draw.circle(self.frameSurface, color, (cx, cy), r)
-        pygame.draw.circle(self.frameSurface, color, (int(self.leftHandX), int(self.leftHandY)), r)
-        pygame.draw.circle(self.frameSurface, color, (int(self.rightHandX), int(self.rightHandY)), r)'''
     
     def run(self):
         while not self.done:
