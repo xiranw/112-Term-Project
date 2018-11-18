@@ -60,14 +60,18 @@ class TechDemo():
                         
                         HandRight = PyKinectV2.JointType_HandRight
                         HandLeft = PyKinectV2.JointType_HandLeft
+                        Head = PyKinectV2.JointType_Head
                         if joints[HandRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
                             self.rightHandPos = (jointPoints[HandRight].x, jointPoints[HandRight].y)
                         if joints[HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
                             self.leftHandPos = (jointPoints[HandLeft].x, jointPoints[HandLeft].y)
+                        if joints[Head].TrackingState != PyKinectV2.TrackingState.NotTracked:
+                            self.headPos = (jointPoints[Head].x, jointPoints[Head].y)
             
-            #self.drawCircles()
+            if self.targetCircles == [] or CircleClass.isShapeComplete(self):
+                CircleClass.generateTargets(self)
+                self.score += 1
             CircleClass.generateBodyCircles(self)
-            CircleClass.generateTargets(self)
             CircleClass.checkCollisions(self)
             CircleClass.drawAll(self)
             
