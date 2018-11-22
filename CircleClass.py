@@ -1,14 +1,21 @@
 #respawn and draw circles; check collisions
 
-blue = (65,105,225)
-red = (255, 0, 0)
-green = (0, 255, 0)
 import pygame
+pygame.font.init()
 import random
+import math
+
+yellow = (240, 236, 87)
+red = (234, 152, 143)
+green = (103, 229, 191)
+black = (0, 5, 45)
+white = (243, 247, 241)
+
+smallFont = pygame.font.SysFont("comicsansms", 65)
 
 class Circle():
     def __init__(self, position):
-        #Overflow error when body is too close, use try/except to catch
+        #overflow error when body is too close, use try/except to catch
         try:
             self.pos = (int(position[0]), int(position[1]))
         except:
@@ -29,13 +36,13 @@ class Circle():
 class targetCircle(Circle):
     def __init__(self, position):
         super().__init__(position)
-        self.color = blue
+        self.color = red
         self.hit = False
-        
+
 class bodyCircle(Circle):
     def __init__(self, position):
         super().__init__(position)
-        self.color = red
+        self.color = yellow
         self.r = 30
         
 def generateBodyCircles(self):
@@ -51,11 +58,11 @@ def generateBodyCircles(self):
 def generateTargets(self, numOfTargets = None):
     #optional parameter ensures more complex shapes will be generated
     if numOfTargets == None:
-        numOfTargets = random.choice((3, 4))
+        numOfTargets = random.choice((2, 3, 4))
     newTargets = []
     for i in range(numOfTargets):
-        targetX = random.randint(300, 1800)
-        targetY = random.randint(200, 1000)
+        targetX = random.randint(500, 1500)
+        targetY = random.randint(200, 900)
         newTargets.append(targetCircle((targetX, targetY)))
     if redoTargets(newTargets):
         newTargets = generateTargets(self, numOfTargets)
@@ -63,27 +70,23 @@ def generateTargets(self, numOfTargets = None):
     return self.targetCircles
 
 def redoTargets(newTargets):
-    #redo targets if they are too close or too far from each other
-    circleX = []
-    circleY = []
-    minXDist, minYDist = 80, 200
-    maxXDist, maxYDist = 800, 800
+    circlesSeen = []
+    minDist, maxDist = 250, 850
     for target in newTargets:
-        targetX, targetY = target.pos[0], target.pos[1]
-        for element in circleX:
-            if abs(targetX - element) < minXDist or \
-               abs(targetX - element) > maxXDist:
-                print("redo " + str(len(newTargets)))
-                return True
-        circleX.append(targetX)
-        for element in circleY:
-            if abs(targetY - element) < minYDist or \
-               abs(targetY - element) > maxYDist:
-                print("redo " + str(len(newTargets)))
-                return True
-        circleY.append(targetY)
+        targetX, targetY = target.pos
+        for prev in circlesSeen:
+            prevX, prevY = prev
+            if checkDistance(targetX, targetY, prevX, prevY) < minDist or\
+               checkDistance(targetX, targetY, prevX, prevY) > maxDist:
+                   print("redo " + str(len(newTargets)))
+                   return True
+        circlesSeen.append(target.pos)
     return False
 
+def checkDistance(x1, y1, x2, y2):
+    distance = math.sqrt( (x2-x1)**2 + (y2-y1)**2 )
+    return distance
+    
 def updateTargets(self):
     for targetCircle in self.targetCircles:
         targetCircle.hit = False
@@ -107,9 +110,10 @@ def drawAll(self):
     for circle in self.bodyCircles:
         circle.draw(self.frameSurface)
     #draw score
-    Font = pygame.font.SysFont("Arial", 50)
-    score = Font.render("Score: " + str(self.score), 0, (0, 0, 0))
-    self.frameSurface.blit(score, (1700, 50))
+    score = smallFont.render("SCORE: " + str(self.score), True, white, black)
+    scoreRect = score.get_rect(topleft = (1500, 50))
+    self.frameSurface.blit(score, scoreRect)
     #draw timeLeft
-    timeLeft = Font.render("Time remaining: %0.2f" %self.timeLeft, 0, (0, 0, 0))
-    self.frameSurface.blit(timeLeft, (100, 50))
+    timeLeft = smallFont.render("Time remaining: %0.2f" %self.timeLeft, True, white, black)
+    timeRect = timeLeft.get_rect(topleft = (100, 50))
+    self.frameSurface.blit(timeLeft, timeRect)
