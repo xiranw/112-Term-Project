@@ -1,4 +1,4 @@
-#respawn and draw circles; check collisions
+#respawn circles; check collisions: redraws everything
 
 import pygame
 pygame.font.init()
