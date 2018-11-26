@@ -4,14 +4,14 @@ import pygame
 pygame.font.init()
 import random
 import math
+import UserLevels
 
-yellow = (240, 236, 87)
 red = (234, 152, 143)
+outlineRed= (255, 0, 0)
+yellow = (240, 236, 87)
 green = (103, 229, 191)
 black = (0, 5, 45)
 white = (243, 247, 241)
-
-smallFont = pygame.font.SysFont("comicsansms", 65)
 
 class Circle():
     def __init__(self, position):
@@ -24,6 +24,8 @@ class Circle():
         
     def draw(self, frameSurface):
         pygame.draw.circle(frameSurface, self.color, self.pos, self.r)
+        if self.color == red:
+            pygame.draw.circle(frameSurface, outlineRed, self.pos, self.r + 5, 5)
 
     def isHit(self, other):
         #circles hit if center of other is within self
@@ -45,6 +47,20 @@ class bodyCircle(Circle):
         self.color = yellow
         self.r = 30
         
+class Polygon():
+    def __init__(self, circleList):
+        self.pointList = []
+        for circle in circleList:
+            self.pointList.append(circle.pos)
+    
+    def draw(self, frameSurface):
+        if len(self.pointList) == 2:
+            pygame.draw.line(frameSurface, outlineRed, self.pointList[0], self.pointList[1], 10)
+        elif len(self.pointList) > 2:
+            pygame.draw.polygon(frameSurface, outlineRed, self.pointList, 10)
+    
+### For Play Mode ###
+
 def generateBodyCircles(self):
     #generate circles at 5 joint positions
     head = bodyCircle(self.headPos)
@@ -57,6 +73,8 @@ def generateBodyCircles(self):
 
 def generateTargets(self, numOfTargets = None):
     #optional parameter ensures more complex shapes will be generated
+    if len(UserLevels.levelsToPlay) != 0:
+        return playUserLevel(self)
     if numOfTargets == None:
         numOfTargets = random.choice((2, 3, 4))
     newTargets = []
@@ -67,6 +85,11 @@ def generateTargets(self, numOfTargets = None):
     if redoTargets(newTargets):
         newTargets = generateTargets(self, numOfTargets)
     self.targetCircles = newTargets
+    return self.targetCircles
+
+def playUserLevel(self):
+    currLevel = UserLevels.levelsToPlay.pop(0)
+    self.targetCircles = currLevel
     return self.targetCircles
 
 def redoTargets(newTargets):
@@ -104,16 +127,42 @@ def isShapeComplete(self):
             return False
     return True
     
-def drawAll(self):
+def playDrawAll(self):
+    shape = Polygon(self.targetCircles)
+    shape.draw(self.frameSurface)
     for circle in self.targetCircles:
         circle.draw(self.frameSurface)
     for circle in self.bodyCircles:
         circle.draw(self.frameSurface)
-    #draw score
-    score = smallFont.render("SCORE: " + str(self.score), True, white, black)
-    scoreRect = score.get_rect(topleft = (1500, 50))
-    self.frameSurface.blit(score, scoreRect)
-    #draw timeLeft
-    timeLeft = smallFont.render("Time remaining: %0.2f" %self.timeLeft, True, white, black)
-    timeRect = timeLeft.get_rect(topleft = (100, 50))
-    self.frameSurface.blit(timeLeft, timeRect)
+    
+### For Level Editor ###
+
+def getHandCircle(self):
+    leftHand = bodyCircle(self.leftHandPos)
+    self.editorHand = [leftHand]
+
+def addTarget(self):
+    newTarget = targetCircle(self.leftHandPos)
+    self.userLevel.append(newTarget)
+
+def deleteTarget(self):
+    newTargets = []
+    targetRemoved = False
+    for circle in reversed(self.userLevel):
+        rightHand = self.editorHand[0]
+        if circle.isHit(rightHand) and targetRemoved == False:
+            targetRemoved = True
+        else:
+            newTargets.append(circle)
+    newTargets.reverse()
+    self.userLevel = newTargets
+
+def editorDrawAll(self):
+    if len(self.userLevel) > 2:
+        shape = Polygon(self.userLevel)
+        shape.draw(self.frameSurface)
+    for circle in self.userLevel:
+        circle.draw(self.frameSurface)
+        print(self.userLevel)
+    for circle in self.editorHand:
+        circle.draw(self.frameSurface)
