@@ -6,17 +6,22 @@ from pykinect2 import PyKinectV2, PyKinectRuntime
 from pykinect2.PyKinectV2 import *
 
 import pygame
+import time
 import ctypes
 import CircleClass
 import Modes
+import UserLevels
 
 class Main():
     def __init__(self):
         #game run logic
         pygame.init()
-        self.gameOver = False
-        self.exit = False
+        self.gameOver = False #game ends
+        self.exit = False #users clicks exit button
+        self.play = False
         self.restart = False
+        self.editor = False
+        
         self.clock = pygame.time.Clock()
         self.timeLeft = 60
         
@@ -28,6 +33,7 @@ class Main():
         self.leftHandPos, self.rightHandPos = (-50, -50), (-50, -50)
         self.leftElbowPos, self.rightElbowPos = (-50, -50), (-50,-50)
         self.leftFootPos, self.rightFootPos = (-50, -50), (-50, -50)
+        self.leftHandState = -1
         
         #screen calibration
         self.screenWidth = 960
@@ -36,9 +42,18 @@ class Main():
         self.kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Body)
         self.frameSurface = pygame.Surface((self.kinect.color_frame_desc.Width, self.kinect.color_frame_desc.Height), 0, 32)
         
-        self.score = -1 #increments 1 when game starts
-        self.canSkip = True
+        self.score = 0
+        
+        #skip logic
         self.skipsLeft = 3
+        self.canSkip = True
+        self.showHint = False
+        self.hintShown = False
+        
+        #editor logic
+        self.canEdit = True
+        self.canSave = True
+        self.userLevel = []
     
     # CITATION - Kinect draw, getJoints framwork, and coordinate conversion:
     # https://github.com/Kinect/PyKinect2/blob/master/examples/PyKinectBodyGame.pymbcs
@@ -102,61 +117,48 @@ class Main():
                         self.leftFootPos = (jointPoints[FootLeft].x, jointPoints[FootLeft].y)
                     if joints[FootRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
                         self.rightFootPos = (jointPoints[FootRight].x, jointPoints[FootRight].y)
-                        
+                    
+                    if joints[HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
+                        self.leftHandState = body.hand_left_state
+    
     def startScreen(self):
         return Modes.runStartScreen(self)
+    
+    def editorScreen(self):
+        return Modes.runEditorScreen(self)
+    
+    def playScreen(self):
+        return Modes.runPlayScreen(self)
     
     def endScreen(self):
         return Modes.runEndScreen(self)
     
     def isJump(self):
+        if self.leftFootPos == (-50, -50):
+            return False
         leftFootY, rightFootY = self.leftFootPos[1], self.rightFootPos[1]
         return leftFootY < 750 and rightFootY < 750
-
+    
+    # CITATION - simple switching screens logic taught by https://www.youtube.com/watch?v=rLrMPg-GCqo
     def run(self):
-        while not self.gameOver:
-            self.timeLeft -= self.clock.tick()/1000 #displays time in seconds
-            if self.timeLeft <= 0:
-                self.gameOver = True
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.gameOver = True
-                    self.exit = True
-            
-            self.drawKinectFrame()
-
-            #we have a body frame, so can get skeletons
-            self.getJointPos()
-            
-            if self.targetCircles == [] or CircleClass.isShapeComplete(self):
-                #make new targets at start of game and when a shape is done
-                CircleClass.generateTargets(self)
-                self.score += 1
-            elif self.canSkip and self.isJump():
-                CircleClass.generateTargets(self)
-                self.skipsLeft -= 1
-                self.canSkip = False
-            elif not self.isJump():
-                self.canSkip = True
-            CircleClass.updateTargets(self)
-            CircleClass.generateBodyCircles(self)
-            CircleClass.checkCollisions(self)
-            CircleClass.drawAll(self)
-            
-            self.adjustKinectFrame()
-            pygame.display.update()
-        
-        while self.gameOver == True and self.exit == False:
-            self.endScreen()
-            if self.restart == True:
+        while not self.exit:
+            self.startScreen()
+            if self.editor == True:
+                self.editorScreen()
                 self.__init__()
                 self.run()
+            elif self.play == True:
+                self.playScreen()
+                self.endScreen()
+                while self.gameOver == True and self.exit == False:
+                    self.endScreen()
+                    if self.restart == True:
+                        self.__init__()
+                        self.run()
 
 game = Main()
-game.startScreen()
-while not game.exit:
-    game.run()
+UserLevels.__init__()
+game.run()
 #close the window and quit
 game.kinect.close()
 pygame.quit()
