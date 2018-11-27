@@ -3,6 +3,7 @@
 import pygame
 pygame.font.init()
 import random
+import time
 import math
 import UserLevels
 
@@ -46,7 +47,33 @@ class bodyCircle(Circle):
         super().__init__(position)
         self.color = yellow
         self.r = 30
+
+class Bomb():
+    def __init__(self):
+        self.pos = (100, 0)
+        self.present = True
+        self.blowing = False
+        self.blow = False
+        bombImage = pygame.image.load("bomb.png").convert_alpha()
+        self.bombImage = pygame.transform.scale(bombImage, (200, 260))
+        blowImage = pygame.image.load("blow.png").convert_alpha()
+        self.blowImage = pygame.transform.scale(blowImage, (300, 200))
         
+    def fall(self):
+        if self.present == True:
+            self.pos = (self.pos[0], self.pos[1]+0.7)
+            if self.pos[1] > 700:
+                self.present = False
+                self.blowing = True
+            
+    def draw(self, frameSurface):
+        if self.present == True:
+            frameSurface.blit(self.bombImage, self.pos)
+        elif self.blowing == True:
+            frameSurface.blit(self.blowImage, self.pos)
+            self.blowing = False
+            self.blow = True
+
 class Polygon():
     def __init__(self, circleList):
         self.pointList = []
@@ -87,6 +114,16 @@ def generateTargets(self, numOfTargets = None):
     self.targetCircles = newTargets
     return self.targetCircles
 
+def checkBomb(self):
+    if self.makeBomb == True:
+        self.newBomb = Bomb()
+        self.makeBomb = False
+    try:
+        self.newBomb.draw(self.frameSurface)
+        self.newBomb.fall()
+    except:
+        pass
+    
 def playUserLevel(self):
     currLevel = UserLevels.levelsToPlay.pop(0)
     self.targetCircles = currLevel
@@ -101,7 +138,7 @@ def redoTargets(newTargets):
             prevX, prevY = prev
             if checkDistance(targetX, targetY, prevX, prevY) < minDist or\
                checkDistance(targetX, targetY, prevX, prevY) > maxDist:
-                   print("redo " + str(len(newTargets)))
+                   # print("redo " + str(len(newTargets)))
                    return True
         circlesSeen.append(target.pos)
     return False
