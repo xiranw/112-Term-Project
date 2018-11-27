@@ -6,11 +6,13 @@ pygame.font.init()
 import CircleClass
 import UserLevels
 import time
+import random
 
 black = (0, 5, 45)
 white = (243, 247, 241)
 yellow = (240, 236, 87)
 green = (103, 229, 191)
+red = (255, 0, 0)
 
 titleFont = pygame.font.SysFont("comicsansms", 100)
 medFont = pygame.font.SysFont("comicsansms", 70)
@@ -104,16 +106,23 @@ def runPlayScreen(self):
         #we have a body frame, so can get skeletons
         self.getJointPos()
         
+        #generates targets and increments score
         if self.targetCircles == []: #game begins
             CircleClass.generateTargets(self)
         elif CircleClass.isShapeComplete(self):
-            self.score += 10 * len(self.targetCircles)
+            if self.newBomb != None:
+                self.score += 100
+            else: 
+                self.score += 10 * len(self.targetCircles)
             CircleClass.generateTargets(self)
-            t1 = t0 #reset level timer
+            resetVariables(self)
+            t0 = t1 #reset level timer
         
+        #skip logic
         elif self.canSkip and self.isJump() and self.skipsLeft > 0:
             CircleClass.generateTargets(self)
-            t1 = t0
+            resetVariables(self)
+            t0 = t1
             self.skipsLeft -= 1
             self.canSkip = False
             self.hintShown = True
@@ -123,7 +132,22 @@ def runPlayScreen(self):
         
         if levelTime > 10 and self.hintShown == False:
             self.showHint = True
-            
+        elif levelTime < 10:
+            if self.showHint == True:
+                self.showHint = False
+                self.hintShown = True
+        
+        #bomb logic
+        if not self.choiceMade:
+            self.makeBomb = random.choice((True, False, False))
+            self.choiceMade = True
+        elif self.newBomb != None and self.newBomb.blow:
+            self.score -= 50
+            CircleClass.generateTargets(self)
+            resetVariables(self)
+            t0 = t1
+        CircleClass.checkBomb(self)
+        
         CircleClass.updateTargets(self)
         CircleClass.generateBodyCircles(self)
         CircleClass.checkCollisions(self)
@@ -137,10 +161,12 @@ def drawPlayText(self):
     score = smallFont.render("SCORE: " + str(self.score), True, white, black)
     scoreRect = score.get_rect(topleft = (100, 200))
     self.frameSurface.blit(score, scoreRect)
+    
     #draw timeLeft
     timeLeft = smallFont.render("Time: %0.2f" %self.timeLeft, True, white, black)
     timeRect = timeLeft.get_rect(topleft = (100, 50))
     self.frameSurface.blit(timeLeft, timeRect)
+    
     #draw stuck hint
     if self.showHint == True:
         #blinking hint!
@@ -157,6 +183,17 @@ def drawPlayText(self):
         skipsRect = score.get_rect(topleft = (1400, 50))
         self.frameSurface.blit(skips, skipsRect)
         
+    #draw bomb instruction
+    if self.newBomb != None and self.newBomb.blow != True:
+        caution = medFont.render("Complete level before bomb hits floor!", True, red, black)
+        cautionRect = caution.get_rect(center=(self.screenWidth, 1000))
+        self.frameSurface.blit(caution, cautionRect)
+    
+def resetVariables(self):
+    self.newBomb = None
+    self.makeBomb = False
+    self.choiceMade = False
+
 ### Level Editor Screen ###
 
 def runEditorScreen(self):
