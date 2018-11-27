@@ -1,6 +1,6 @@
 # main run function
 
-# 11/20: added score, timer, constraints on generation of targets, fixed overflow error
+# things to do: research multi, generate black circles, change editor inheritance
 
 from pykinect2 import PyKinectV2, PyKinectRuntime
 from pykinect2.PyKinectV2 import *
@@ -54,7 +54,12 @@ class Main():
         self.canEdit = True
         self.canSave = True
         self.userLevel = []
-    
+        
+        #bomb!
+        self.newBomb = None
+        self.makeBomb = False
+        self.choiceMade = False
+        
     # CITATION - Kinect draw, getJoints framwork, and coordinate conversion:
     # https://github.com/Kinect/PyKinect2/blob/master/examples/PyKinectBodyGame.pymbcs
 
