@@ -5,7 +5,7 @@ pygame.font.init()
 import random
 import time
 import math
-import UserLevels
+import Globals
 
 red = (234, 152, 143)
 outlineRed= (255, 0, 0)
@@ -109,7 +109,7 @@ def generateBodyCircles(self):
 
 def generateTargets(self, numOfTargets = None):
     #optional parameter ensures more complex shapes will be generated
-    if len(UserLevels.levelsToPlay) != 0:
+    if len(Globals.levelsToPlay) != 0:
         return playUserLevel(self)
     if numOfTargets == None:
         numOfTargets = random.choice((2, 3, 4))
@@ -125,7 +125,7 @@ def generateTargets(self, numOfTargets = None):
 
 def playUserLevel(self):
     #level: [[circlesPos], is there bomb, bomb speed]
-    currLevel = UserLevels.levelsToPlay.pop(0)
+    currLevel = Globals.levelsToPlay.pop(0)
     self.targetCircles = currLevel[0]
     self.choiceMade = True
     if currLevel[1] == True:
