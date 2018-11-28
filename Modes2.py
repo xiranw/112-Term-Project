@@ -49,11 +49,14 @@ def buttonClicked(self, button):
         x1, y1 = 1680, 350
         deltaX, deltaY = self.noButtonSize
     elif button == "slow":
-        pass
+        x1, y1 = 1500, 460
+        deltaX, deltaY = self.slowButtonSize
     elif button == "med":
-        pass
+        x1, y1 = 1500, 560
+        deltaX, deltaY = self.medButtonSize
     elif button == "fast":
-        pass
+        x1, y1 = 1500, 660
+        deltaX, deltaY = self.fastButtonSize
     leftHandX, leftHandY = self.leftHandPos
     return x1 < leftHandX < x1 + deltaX and y1 < leftHandY < y1 + deltaY
 
@@ -173,6 +176,9 @@ def runPlayScreen(self):
         
         self.adjustKinectFrame()
         pygame.display.update()
+    
+    if self.score > UserLevels.highScore:
+        UserLevels.highScore = self.score
 
 def drawPlayText(self):
     #draw score
@@ -216,6 +222,7 @@ def resetVariables(self):
 
 def runEditorScreen(self):
     onEditorScreen = True
+    speed = 0.7
     while onEditorScreen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -224,7 +231,6 @@ def runEditorScreen(self):
     
         self.drawKinectFrame()
         drawEditorText(self)
-        
         self.getJointPos()
         
         # save and back buttons
@@ -236,6 +242,7 @@ def runEditorScreen(self):
             UserLevels.editedLevels.append(level)
             UserLevels.levelsToPlay.append(level)
             self.userBomb, self.makeBomb = False, False
+            self.newBomb = None
             self.userLevel = []
         elif backClicked(self):
             self.userBomb, self.makeBomb = False, False
@@ -249,18 +256,21 @@ def runEditorScreen(self):
             self.userBomb = False
             self.newBomb = None
         
-        Shapes.checkBomb(self)
-        
+        Shapes.checkBomb(self, speed)
+    
         if self.userBomb == True:
-            if slowClicked(self) and self.newBomb.speed != 0.7:
-                self.makeBomb = True
-                self.newBomb.speed = 0.7
-            elif medClicked(self) and self.newBomb.speed != 0.9:
-                self.makeBomb = True
-                self.newBomb.speed = 0.9
-            elif fastClicked(self) and self.newBomb.speed != 1.2:
-                self.makeBomb = True
-                self.newBomb.speed = 1.2
+            try:
+                if slowClicked(self) and self.newBomb.speed != 0.7:
+                    self.makeBomb = True
+                    speed = 0.7
+                elif medClicked(self) and self.newBomb.speed != 0.9:
+                    self.makeBomb = True
+                    speed = 0.9
+                elif fastClicked(self) and self.newBomb.speed != 1.2:
+                    self.makeBomb = True
+                    speed = 1.2
+            except:
+                pass
         
         # adding and deleting targets
         if self.canEdit and self.leftHandState == 3: #closed fist
@@ -286,6 +296,10 @@ def drawEditorText(self):
     lasso = medFont.render("Lasso: delete", True, black)
     lassoRect = fist.get_rect(topleft=(150, 400))
     self.frameSurface.blit(lasso, lassoRect)
+    
+    question = medFont.render("Bomb?", True, black)
+    questionRect = question.get_rect(topleft = (1550, 230))
+    self.frameSurface.blit(question, questionRect)
     
     self.saveButtonSize = drawButton(self, "SAVE", titleFont, "topleft",
                                      white, black, (330, 50))
@@ -313,9 +327,9 @@ def drawSpeedButtons(self):
     elif speed == 1.2:
         fastColor = green
         slowColor, medColor = black, black
-    slowButtonSize = drawButton("Slow", smallFont, "topleft", white, slowColor, (1500, 440))
-    medButtonSize = drawButton("Med", smallFont, "topleft", white, medColor, (1500, 485))
-    fastButtonSize = drawButton("Fast", smallFont, "topleft", white, fastColor, (1500, 530))
+    self.slowButtonSize = drawButton(self, "Slow", smallFont, "topleft", white, slowColor, (1500, 460))
+    self.medButtonSize = drawButton(self, "Med", smallFont, "topleft", white, medColor, (1500, 560))
+    self.fastButtonSize = drawButton(self, "Fast", smallFont, "topleft", white, fastColor, (1500, 660))
         
 def saveClicked(self):
     return buttonClicked(self, "saveButton")
@@ -367,6 +381,10 @@ def drawEndText(self):
     over = titleFont.render("Game Over! Your score is " + str(self.score), True, black)
     overRect = over.get_rect(center=(self.screenWidth, 100))
     self.frameSurface.blit(over, overRect)
+    
+    highScore = medFont.render("High Score: " + str(UserLevels.highScore), True, black)
+    highRect = highScore.get_rect(center=(self.screenWidth, 200))
+    self.frameSurface.blit(highScore, highRect)
     
     restart = medFont.render("Make a Y shape to restart", True, white, black)
     restartRect = restart.get_rect(center=(self.screenWidth, 400))
