@@ -72,9 +72,9 @@ class Bomb():
         else:
             frameSurface.blit(self.blowImage, self.pos)
 
-def checkBomb(self):
+def checkBomb(self, speed=0.7):
     if self.makeBomb == True:
-        self.newBomb = Bomb()
+        self.newBomb = Bomb(speed)
         self.makeBomb = False
     try:
         self.newBomb.fall()
