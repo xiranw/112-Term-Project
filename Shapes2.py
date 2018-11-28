@@ -1,4 +1,4 @@
-#respawn circles; check collisions: redraws everything
+#three major classes for this game: Circle, Bomb, and Polygon
 
 import pygame
 pygame.font.init()
@@ -134,6 +134,7 @@ def playUserLevel(self):
     return self.targetCircles
 
 def redoTargets(newTargets):
+    #for creating feasible targets
     circlesSeen = []
     minDist, maxDist = 250, 850
     for target in newTargets:
@@ -168,7 +169,7 @@ def isShapeComplete(self):
             return False
     return True
     
-def playDrawAll(self):
+def drawPlayShapes(self):
     shape = Polygon(self.targetCircles)
     shape.draw(self.frameSurface)
     for circle in self.targetCircles:
@@ -198,7 +199,7 @@ def deleteTarget(self):
     newTargets.reverse()
     self.userLevel = newTargets
 
-def editorDrawAll(self):
+def drawEditorShapes(self):
     if len(self.userLevel) > 2:
         shape = Polygon(self.userLevel)
         shape.draw(self.frameSurface)
