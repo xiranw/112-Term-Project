@@ -10,7 +10,7 @@ import time
 import ctypes
 import Shapes
 import Modes
-import UserLevels
+import Globals
 
 class Main():
     def __init__(self):
@@ -162,7 +162,7 @@ class Main():
                         self.run()
 
 game = Main()
-UserLevels.__init__()
+Globals.__init__()
 game.run()
 #close the window and quit
 game.kinect.close()
