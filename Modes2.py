@@ -4,7 +4,7 @@ import pygame
 pygame.font.init()
 
 import Shapes
-import UserLevels
+import Globals
 import time
 import random
 
@@ -177,8 +177,8 @@ def runPlayScreen(self):
         self.adjustKinectFrame()
         pygame.display.update()
     
-    if self.score > UserLevels.highScore:
-        UserLevels.highScore = self.score
+    if self.score > Globals.highScore:
+        Globals.highScore = self.score
 
 def drawPlayText(self):
     #draw score
@@ -239,8 +239,8 @@ def runEditorScreen(self):
                 level = [self.userLevel, self.userBomb, 0]
             else:
                 level = [self.userLevel, self.userBomb, self.newBomb.speed]
-            UserLevels.editedLevels.append(level)
-            UserLevels.levelsToPlay.append(level)
+            Globals.editedLevels.append(level)
+            Globals.levelsToPlay.append(level)
             self.userBomb, self.makeBomb = False, False
             self.newBomb = None
             self.userLevel = []
@@ -382,7 +382,7 @@ def drawEndText(self):
     overRect = over.get_rect(center=(self.screenWidth, 100))
     self.frameSurface.blit(over, overRect)
     
-    highScore = medFont.render("High Score: " + str(UserLevels.highScore), True, black)
+    highScore = medFont.render("High Score: " + str(Globals.highScore), True, black)
     highRect = highScore.get_rect(center=(self.screenWidth, 200))
     self.frameSurface.blit(highScore, highRect)
     
