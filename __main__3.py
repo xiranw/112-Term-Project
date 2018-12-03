@@ -29,14 +29,9 @@ class Main():
         self.targetCircles = []
         
         #joint positions
-        self.bodyDict = { "body0":[[],[]], "body1":[[],[]], "body2":[[], []],
-                          "body3":[[],[]], "body4":[[],[]], "body5":[[], []]}
-        #2 lists per body: joints and hand states
-        self.headPos = (-50, -50)
-        self.leftHandPos, self.rightHandPos = (-50, -50), (-50, -50)
-        self.leftElbowPos, self.rightElbowPos = (-50, -50), (-50,-50)
-        self.leftFootPos, self.rightFootPos = (-50, -50), (-50, -50)
-        self.leftHandState = -1
+        self.bodyDict = { "body0":[[],[],[],True], "body1":[[],[],[],True], "body2":[[],[],[],True],
+                          "body3":[[],[],[],True], "body4":[[],[],[],True], "body5":[[],[],[],True]}
+        #per body: joints, hand states, depth, canEdit
         
         #screen calibration
         self.screenWidth = 960
@@ -46,6 +41,8 @@ class Main():
         self.frameSurface = pygame.Surface((self.kinect.color_frame_desc.Width, self.kinect.color_frame_desc.Height), 0, 32)
         
         self.score = 0
+        self.level = "static"
+        self.alreadyMoving = False
         
         #skip logic
         self.skipsLeft = 3
@@ -96,7 +93,7 @@ class Main():
                 for i in range(0, self.kinect.max_body_count):
                     body = self.bodies.bodies[i]
                     if not body.is_tracked:
-                        self.bodyDict["body"+str(i)] = [[],[]]
+                        self.bodyDict["body"+str(i)] = [[],[],[], True]
                         continue
                     
                     joints = body.joints
@@ -113,26 +110,37 @@ class Main():
                     
                     #change joint positions if they are tracked
                     if joints[Head].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.headPos = (jointPoints[Head].x, jointPoints[Head].y)
+                        headPos = (jointPoints[Head].x, jointPoints[Head].y)
+                        headDepth = int((joints[Head].Position.z) * 100)
                     if joints[HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.leftHandPos = (jointPoints[HandLeft].x, jointPoints[HandLeft].y)
+                        leftHandPos = (jointPoints[HandLeft].x, jointPoints[HandLeft].y)
+                        leftHandDepth = int((joints[Head].Position.z) * 100)
                     if joints[HandRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.rightHandPos = (jointPoints[HandRight].x, jointPoints[HandRight].y)
+                        rightHandPos = (jointPoints[HandRight].x, jointPoints[HandRight].y)
                     if joints[ElbowLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.leftElbowPos = (jointPoints[ElbowLeft].x, jointPoints[ElbowLeft].y)
+                        leftElbowPos = (jointPoints[ElbowLeft].x, jointPoints[ElbowLeft].y)
                     if joints[ElbowRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.rightElbowPos = (jointPoints[ElbowRight].x, jointPoints[ElbowRight].y)
+                        rightElbowPos = (jointPoints[ElbowRight].x, jointPoints[ElbowRight].y)
                     if joints[FootLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.leftFootPos = (jointPoints[FootLeft].x, jointPoints[FootLeft].y)
+                        leftFootPos = (jointPoints[FootLeft].x, jointPoints[FootLeft].y)
                     if joints[FootRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.rightFootPos = (jointPoints[FootRight].x, jointPoints[FootRight].y)
+                        rightFootPos = (jointPoints[FootRight].x, jointPoints[FootRight].y)
                     
                     if joints[HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
-                        self.leftHandState = body.hand_left_state
-                    allJoints = [self.headPos, self.leftHandPos, self.rightHandPos,
-                                 self.leftElbowPos, self.rightElbowPos, self.leftFootPos, self.rightFootPos]
+                        leftHandState = body.hand_left_state
+                    allJoints = [headPos, leftHandPos, rightHandPos,
+                                 leftElbowPos, rightElbowPos, leftFootPos, rightFootPos]
+                        
                     self.bodyDict["body"+str(i)][0] = allJoints
-                    self.bodyDict["body"+str(i)][1] = [self.leftHandState]
+                    self.bodyDict["body"+str(i)][1] = [leftHandState]
+                    self.bodyDict["body"+str(i)][2] = [headDepth, leftHandDepth]
+    
+    def checkBodyCount(self):
+        count = 0
+        for body in self.bodyDict:
+            if self.bodyDict[body][0] != []:
+                count += 1
+        return count
     
     def startScreen(self):
         return Modes.runStartScreen(self)
