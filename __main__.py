@@ -1,7 +1,5 @@
 # main run function
 
-# things to do: research multi, generate black circles, change editor inheritance
-
 from pykinect2 import PyKinectV2, PyKinectRuntime
 from pykinect2.PyKinectV2 import *
 
