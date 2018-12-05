@@ -118,7 +118,6 @@ class Main():
                         headDepth = int((joints[Head].Position.z) * 100)
                     if joints[HandLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
                         leftHandPos = (jointPoints[HandLeft].x, jointPoints[HandLeft].y)
-                        leftHandDepth = int((joints[Head].Position.z) * 100)
                     if joints[HandRight].TrackingState != PyKinectV2.TrackingState_NotTracked:
                         rightHandPos = (jointPoints[HandRight].x, jointPoints[HandRight].y)
                     if joints[ElbowLeft].TrackingState != PyKinectV2.TrackingState_NotTracked:
@@ -137,7 +136,7 @@ class Main():
                         
                     self.bodyDict["body"+str(i)][0] = allJoints
                     self.bodyDict["body"+str(i)][1] = [leftHandState]
-                    self.bodyDict["body"+str(i)][2] = [headDepth, leftHandDepth]
+                    self.bodyDict["body"+str(i)][2] = [headDepth]
     
     def checkBodyCount(self):
         count = 0
